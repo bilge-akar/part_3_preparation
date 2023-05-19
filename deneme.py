@@ -6,15 +6,15 @@ import random
 
 class Player():
     def __init__(self, bomb):
-        self.__speed: int
-        self.__direction:list
-        self.__image: str
-        self.__location :list
-        self.__player_score: int
-        self.__player_remaining_lives: int
+        self.__speed=5
+        self.__direction=[1,0]
+        #self.__image = 
+        self.__location = [60,60]
+        self.__player_score = 0
+        self.__player_remaining_lives = 3
         
-    def __move():
-        pass
+    def __move(self,direction):
+        self.__location=[self.__direction[0]*self.__speed, self.__direction[1]*self.__speed]
 
     def __place_bomb():
         pass
@@ -126,10 +126,6 @@ class Stationary:
     def __init__(self):
         self.__names_of_stationary: list
 
-    def __draw_stationaries(self,screen,image,x,y):
-        screen.blit(image,(x,y))
-
- 
 
 class Collectible(Stationary):
     
@@ -148,12 +144,13 @@ class Collectible(Stationary):
 
 
 class Wall(Stationary):
-    
-    def __init__(self, location,image): #?
+
+  
+    def __init__(self, location): #?
         super().__init__() #?
-        # new
-        self.__location_of_wall=location
-        self.__wall_image=image
+        self.__location_of_wall=location #class attribute sakıncalı  mı, private nasıl yapacaz 
+        self.__wall_image=pygame.transform.scale(pygame.image.load('wall.png'), (40,40))
+
     
     def __is_there_a_wall():
         pass
@@ -165,7 +162,7 @@ class Wall(Stationary):
 
 class Brick(Stationary):
     
-    def __init__(self):
+    def __init__(self,location):
         super().__init__()
         self.__brick_location:list
         self.__brick_image:str
@@ -200,7 +197,7 @@ class Game():#
         #icon = pygame.image.load('spaceship (1).png')
         #pygame.display.set_icon(icon)
 
-        self.__window_height = 650
+        self.__window_height = 600
         self.__window_width = 920
         self.__window_color = (255,0,0)
 
@@ -222,7 +219,7 @@ class Game():#
 
 
         ### new
-        self.__wall_list=[]
+        self.__boundaries=[]
 
 
         a=1 #$$$$$$$$$44
@@ -236,11 +233,20 @@ class Game():#
 
         
         ### new fonksiyon içine al...
-        for i in range(21):
+        for i in range(23):
             for j in range(15):
-                if i==0 or j==0 or i==20 or j==14:
-                    self.__wall_list.append(Wall([i*40,j*40],pygame.transform.scale(self.__background1, (40, 40))))
-        
+                if i==0 or j==0 or i==22 or j==14 or (i%2==0 and j%2==0):
+                    self.__boundaries.append(Wall([i*40,j*40]))
+
+                    if i%2==0 and j%2==0:
+                        random_number=random.randint(0,3)
+                        random_coor_x=[i*40-40,i*40+40,i*40]
+                        random_coor_y=[j*40-40,j*40+40,j*40]
+                        for k in range(random_number%3==0):
+                            self.__boundaries.append(Brick([random_coor_x[random.randint(0,2)],random_coor_y[random.randint(0,2)]]))
+                        
+
+                
         random_x=40
         random_y=40
         for i in range(20):
@@ -255,6 +261,9 @@ class Game():#
         while running:
 
            
+            
+
+            self.__player._Player__direction=[0,0]
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -267,29 +276,40 @@ class Game():#
                     if event.key == K_ESCAPE:
                         running = False
 
+                    if event.key == K_UP:
+                        self.__player._Player__direction=[0,-1]
+                        
                     if event.key == K_DOWN:
-                        pass
+                        self.__player._Player__direction=[0,1]
 
                     if event.key == K_RIGHT:
-                        pass
+                        self.__player._Player__direction=[1,0]
 
                     if event.key == K_LEFT:
-                        pass
+                        self.__player._Player__direction=[-1,0]
 
                     if event.key == K_RETURN:
                             self.__screen_number=1
                             self.__show_screen(self.__all_screen_attribues[self.__screen_number])
 
-                    for i in range(56):#??????????????????????
-                            self.__wall_list[i]._Stationary__draw_stationaries(self.__screen, self.__wall_list[i]._Wall__wall_image, self.__wall_list[i]._Wall__location_of_wall[0], self.__wall_list[i]._Wall__location_of_wall[1])
+                    for i in range(len(self.__boundaries)):#
+                            self.__draw(self.__screen, self.__boundaries[i]._Wall__wall_image, self.__boundaries[i]._Wall__location_of_wall)
 
 
                     """for i in range(57,66):#??????????????????????
-                            self.__wall_list[i]._Stationary__draw_stationaries(self.__screen, self.__wall_list[i]._Wall__wall_image, self.__wall_list[i]._Wall__location_of_wall[0], self.__wall_list[i]._Wall__location_of_wall[1])
+                            self.__boundaries[i]._Stationary__draw(self.__screen, self.__boundaries[i]._Wall__wall_image, self.__boundaries[i]._Wall__location_of_wall[0], self.__boundaries[i]._Wall__location_of_wall[1])
                             print("q")"""
             #end of game.run
+
+            #self.__player._Player__move(self.__player._Player__direction)
+            #self.__draw(self.__screen, self.__player._Player__image,self.__player._Player__location)
             pygame.display.update()
 
+    
+    def __draw(self,screen,image,location):
+        screen.blit(image,(location[0],location[1]))
+
+ 
     def __end_game(self):
         pygame.quit()
 
