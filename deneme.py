@@ -8,13 +8,15 @@ class Player():
     def __init__(self, bomb):
         self.__speed=5
         self.__direction=[1,0]
-        #self.__image = 
-        self.__location = [60,60]
+        self.__image = pygame.transform.scale(pygame.image.load('player.png'), (40,40))
+        self.__player_location = [35,35]
         self.__player_score = 0
         self.__player_remaining_lives = 3
         
     def __move(self,direction):
-        self.__location=[self.__direction[0]*self.__speed, self.__direction[1]*self.__speed]
+        self.__player_location[0]+=self.__direction[0]*self.__speed
+        self.__player_location[1]+=self.__direction[1]*self.__speed
+        
 
     def __place_bomb():
         pass
@@ -164,8 +166,8 @@ class Brick(Stationary):
     
     def __init__(self,location):
         super().__init__()
-        self.__brick_location:list
-        self.__brick_image:str
+        self.__brick_location = location
+        self.__brick_image = pygame.transform.scale(pygame.image.load('brick.png'), (40,40))
 
     
     def __delete_bricks():
@@ -199,7 +201,7 @@ class Game():#
 
         self.__window_height = 600
         self.__window_width = 920
-        self.__window_color = (255,0,0)
+        self.__window_color = (102,102,255)
 
         self.__background1 = pygame.image.load('bg1.jpg') #yeni eklendi
         self.__background2 = pygame.image.load('bg2.jpg')
@@ -220,6 +222,7 @@ class Game():#
 
         ### new
         self.__boundaries=[]
+        self.__bricks=[]
 
 
         a=1 #$$$$$$$$$44
@@ -228,7 +231,6 @@ class Game():#
         self.__ghost=Pawn()
         self.__ghost=Boss() 
         self.__collectible=Collectible() 
-        self.__brick=Brick()
         self.__gate=Gate()
 
         
@@ -238,12 +240,17 @@ class Game():#
                 if i==0 or j==0 or i==22 or j==14 or (i%2==0 and j%2==0):
                     self.__boundaries.append(Wall([i*40,j*40]))
 
-                    if i%2==0 and j%2==0:
+
+                    random_coor_x=[i*40-40,i*40+40,i*40]
+                    random_coor_y=[j*40-40,j*40+40,j*40]
+
+                    if i%2==0 and j%2==0 and i!=0 and j!=0 and i!=22 and j!=14:
                         random_number=random.randint(0,3)
-                        random_coor_x=[i*40-40,i*40+40,i*40]
-                        random_coor_y=[j*40-40,j*40+40,j*40]
-                        for k in range(random_number%3==0):
-                            self.__boundaries.append(Brick([random_coor_x[random.randint(0,2)],random_coor_y[random.randint(0,2)]]))
+                        random_x_number=random.randint(0,2)
+                        random_y_number=random.randint(0,2)
+                        for k in range(random_number):
+                            if not random_x_number==random_y_number==2:
+                                self.__bricks.append(Brick([random_coor_x[random_x_number],random_coor_y[random_y_number]]))
                         
 
                 
@@ -263,7 +270,7 @@ class Game():#
            
             
 
-            self.__player._Player__direction=[0,0]
+            
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -284,6 +291,8 @@ class Game():#
 
                     if event.key == K_RIGHT:
                         self.__player._Player__direction=[1,0]
+                        self.__player._Player__move(self.__player._Player__direction)
+                        
 
                     if event.key == K_LEFT:
                         self.__player._Player__direction=[-1,0]
@@ -291,18 +300,34 @@ class Game():#
                     if event.key == K_RETURN:
                             self.__screen_number=1
                             self.__show_screen(self.__all_screen_attribues[self.__screen_number])
+                
+                
+
+
+
+
+
+
+                ########################
+
+                if self.__screen_number==1:
+
+                    self.__screen.fill(self.__window_color)
+                    
+                    self.__player._Player__move(self.__player._Player__direction)
+
+                    for i in range(len(self.__bricks)):#
+                            self.__draw(self.__screen, self.__bricks[i]._Brick__brick_image , self.__bricks[i]._Brick__brick_location)
 
                     for i in range(len(self.__boundaries)):#
                             self.__draw(self.__screen, self.__boundaries[i]._Wall__wall_image, self.__boundaries[i]._Wall__location_of_wall)
+                            
+                    
+                        
+                    self.__draw(self.__screen, self.__player._Player__image,self.__player._Player__player_location)
 
 
-                    """for i in range(57,66):#??????????????????????
-                            self.__boundaries[i]._Stationary__draw(self.__screen, self.__boundaries[i]._Wall__wall_image, self.__boundaries[i]._Wall__location_of_wall[0], self.__boundaries[i]._Wall__location_of_wall[1])
-                            print("q")"""
-            #end of game.run
-
-            #self.__player._Player__move(self.__player._Player__direction)
-            #self.__draw(self.__screen, self.__player._Player__image,self.__player._Player__location)
+                 
             pygame.display.update()
 
     
