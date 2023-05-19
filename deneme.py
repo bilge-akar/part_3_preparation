@@ -7,15 +7,17 @@ import random
 class Player():
     def __init__(self, bomb):
         self.__speed=5
-        self.__direction=[1,0]
-        self.__image = pygame.transform.scale(pygame.image.load('player.png'), (40,40))
-        self.__player_location = [35,35]
+        self.__direction=[0,0]
+        self.__image = pygame.transform.scale(pygame.image.load('wall.png'), (30,30))
+        self.__player_location = [40,40]
         self.__player_score = 0
         self.__player_remaining_lives = 3
         
     def __move(self,direction):
-        self.__player_location[0]+=self.__direction[0]*self.__speed
-        self.__player_location[1]+=self.__direction[1]*self.__speed
+        
+        self.__player_location[0]+=direction[0]*self.__speed
+        self.__player_location[1]+=direction[1]*self.__speed
+
         
 
     def __place_bomb():
@@ -147,10 +149,11 @@ class Collectible(Stationary):
 
 class Wall(Stationary):
 
-  
+   
+
     def __init__(self, location): #?
         super().__init__() #?
-        self.__location_of_wall=location #class attribute sakıncalı  mı, private nasıl yapacaz 
+        self.__location_of_wall=location #class attribute sakıncalı  mı, private nasıl yapacaz
         self.__wall_image=pygame.transform.scale(pygame.image.load('wall.png'), (40,40))
 
     
@@ -159,6 +162,8 @@ class Wall(Stationary):
 
     def __are_there_walls():
         pass
+
+    
     
 
 
@@ -221,7 +226,7 @@ class Game():#
 
 
         ### new
-        self.__boundaries=[]
+        self.__wall_list=[]
         self.__bricks=[]
 
 
@@ -238,7 +243,7 @@ class Game():#
         for i in range(23):
             for j in range(15):
                 if i==0 or j==0 or i==22 or j==14 or (i%2==0 and j%2==0):
-                    self.__boundaries.append(Wall([i*40,j*40]))
+                    self.__wall_list.append(Wall([i*40,j*40]))
 
 
                     random_coor_x=[i*40-40,i*40+40,i*40]
@@ -268,15 +273,17 @@ class Game():#
         while running:
 
            
-            
 
             
 
             for event in pygame.event.get():
+                pygame.key.set_repeat(100,25)
+               
                 if event.type == pygame.QUIT:
                     self.__end_game()
                     
 
+                
 
                 elif event.type == KEYDOWN:
 
@@ -284,18 +291,29 @@ class Game():#
                         running = False
 
                     if event.key == K_UP:
-                        self.__player._Player__direction=[0,-1]
+                        if self.__is_there_a_wall(self.__wall_list, self.__get_player_location(),[0,-1])==False:
+                            self.__player._Player__direction=[0,-1]
+                        else:
+                            self.__player._Player__direction=[0,0]
                         
                     if event.key == K_DOWN:
-                        self.__player._Player__direction=[0,1]
+                        if self.__is_there_a_wall(self.__wall_list, self.__get_player_location(),[0,1])==False:
+                            self.__player._Player__direction=[0,1]
+                        else:
+                            self.__player._Player__direction=[0,0]
 
                     if event.key == K_RIGHT:
-                        self.__player._Player__direction=[1,0]
-                        self.__player._Player__move(self.__player._Player__direction)
+                        if self.__is_there_a_wall(self.__wall_list, self.__get_player_location(),[1,0])==False:
+                            self.__player._Player__direction=[1,0]
+                        else:
+                            self.__player._Player__direction=[0,0]
                         
-
+                        
                     if event.key == K_LEFT:
-                        self.__player._Player__direction=[-1,0]
+                        if self.__is_there_a_wall(self.__wall_list, self.__get_player_location(),[-1,0])==False:
+                            self.__player._Player__direction=[-1,0]
+                        else:
+                            self.__player._Player__direction=[0,0]
 
                     if event.key == K_RETURN:
                             self.__screen_number=1
@@ -313,14 +331,15 @@ class Game():#
                 if self.__screen_number==1:
 
                     self.__screen.fill(self.__window_color)
+
                     
                     self.__player._Player__move(self.__player._Player__direction)
 
                     for i in range(len(self.__bricks)):#
                             self.__draw(self.__screen, self.__bricks[i]._Brick__brick_image , self.__bricks[i]._Brick__brick_location)
 
-                    for i in range(len(self.__boundaries)):#
-                            self.__draw(self.__screen, self.__boundaries[i]._Wall__wall_image, self.__boundaries[i]._Wall__location_of_wall)
+                    for i in range(len(self.__wall_list)):#
+                            self.__draw(self.__screen, self.__wall_list[i]._Wall__wall_image, self.__wall_list[i]._Wall__location_of_wall)
                             
                     
                         
@@ -350,8 +369,52 @@ class Game():#
     def __is_there_a_collectible(self):
         pass
 
-    def __is_there_a_wall(self):
-        pass
+    def __is_there_a_wall(self, wall_list, player_location, new_direction):
+
+        if new_direction==[1,0]:
+            forbidden_ys=[n for n in range(player_location[1]-37, player_location[1]+27)]
+            for i in range(len(wall_list)):
+                if wall_list[i]._Wall__location_of_wall[1] in forbidden_ys:
+                    for j in range(29):#speed
+                        if player_location[0]+j==wall_list[i]._Wall__location_of_wall[0]:
+                            return True       
+            return False
+        
+        elif new_direction==[-1,0]:
+            forbidden_ys=[n for n in range(player_location[1]-37, player_location[1]+27)]
+            for i in range(len(wall_list)):
+                if wall_list[i]._Wall__location_of_wall[1] in forbidden_ys:
+                    for j in range(29):#speed
+                        if player_location[0]-j==wall_list[i]._Wall__location_of_wall[0]:
+                            return True       
+            return False
+        
+        elif new_direction==[0,1]:
+            forbidden_xs=[n for n in range(player_location[0]-37, player_location[0]+27)]
+            for i in range(len(wall_list)):
+                if wall_list[i]._Wall__location_of_wall[0] in forbidden_xs:
+                    for j in range(29):
+                        if player_location[1]+j==wall_list[i]._Wall__location_of_wall[1]:
+                            return True       
+            return False
+        
+        elif new_direction==[0,-1]:
+            forbidden_xs=[n for n in range(player_location[0]-37, player_location[0]+27)]
+            for i in range(len(wall_list)):
+                if wall_list[i]._Wall__location_of_wall[0] in forbidden_xs:
+                    for j in range(29):
+                        if player_location[1]-j==wall_list[i]._Wall__location_of_wall[1]:
+                            return True       
+            return False
+
+
+        return False
+
+            
+            
+                    
+        
+                    
 
     def __is_there_a_gate(self):
         pass
@@ -365,7 +428,7 @@ class Game():#
     def __create_bomb(self):
         pass
 
-    def __chechk_boundaries(self):
+    def __chechk_wall_list(self):
         pass
 
     def __are_bricks_hit(self):
@@ -376,6 +439,9 @@ class Game():#
 
     def __is_player_hit_by_mons(self):
         pass
+
+    def __get_player_location(self):
+        return self.__player._Player__player_location
 
 
 
