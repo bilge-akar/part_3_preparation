@@ -200,8 +200,8 @@ class Game():#
         #icon = pygame.image.load('spaceship (1).png')
         #pygame.display.set_icon(icon)
 
-        self.__window_height = 700
-        self.__window_width = 900
+        self.__window_height = 650
+        self.__window_width = 920
         self.__window_color = (255,0,0)
 
         self.__background1 = pygame.image.load('bg1.jpg') #yeni eklendi
@@ -236,19 +236,17 @@ class Game():#
 
         
         ### new fonksiyon içine al...
-        for i in range(15):
+        for i in range(21):
             for j in range(15):
-                if i==0 or j==0 or i==14 or j==14:
+                if i==0 or j==0 or i==20 or j==14:
                     self.__wall_list.append(Wall([i*40,j*40],pygame.transform.scale(self.__background1, (40, 40))))
         
         random_x=40
         random_y=40
-        for i in range(10):
+        for i in range(20):
             #random_x=random.randint(random_x,random_x+40+)
-            self.__wall_list.append(Wall([random.randint(40,),j*40],pygame.transform.scale(self.__background1, (40, 40))))
-        
 
-
+            pass
 
     
 
@@ -285,6 +283,10 @@ class Game():#
                     for i in range(56):#??????????????????????
                             self.__wall_list[i]._Stationary__draw_stationaries(self.__screen, self.__wall_list[i]._Wall__wall_image, self.__wall_list[i]._Wall__location_of_wall[0], self.__wall_list[i]._Wall__location_of_wall[1])
 
+
+                    """for i in range(57,66):#??????????????????????
+                            self.__wall_list[i]._Stationary__draw_stationaries(self.__screen, self.__wall_list[i]._Wall__wall_image, self.__wall_list[i]._Wall__location_of_wall[0], self.__wall_list[i]._Wall__location_of_wall[1])
+                            print("q")"""
             #end of game.run
             pygame.display.update()
 
