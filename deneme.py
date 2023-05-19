@@ -68,8 +68,8 @@ class Bomb:
 class Monster():
 
     def __init__(self):
-        self.__monster_speed: int
-        self.__monster_remaining_lives:int
+        self.__monster_speed=3
+        self.__monster_remaining_lives=1
 
     
     def __kill():
@@ -79,9 +79,6 @@ class Monster():
         pass
 
     def __monster_die():
-        pass
-
-    def __draw_me():
         pass
 
     def __reduce_remaining_lives():
@@ -94,21 +91,45 @@ class Pawn(Monster):
     
     def __init__(self):
         super().__init__()
-        self.__pawn_direction:list
-        self.__pawn_image: str
-        self.__pawn_location :list
+        self.__pawn_speed=1 ## inherit et
+        self.__pawn_direction=[1,0]
+        self.__pawn_image=pygame.transform.scale(pygame.image.load("pawn.png"),(30,30))
+        self.__pawn_location = [250,250]
 
-    def __pawn_move():
-        pass
+    def __pawn_move(self,direction):
+
+        """n=random.randint(1,1000)
+        if n==1:
+            self.__change_pawn_direction(direction)
+            self.__pawn_location[0]+=direction[0]*self.__pawn_speed
+            self.__pawn_location[1]+=direction[1]*self.__pawn_speed
+        else:"""
+        self.__pawn_location[0]+=direction[0]*self.__pawn_speed
+        self.__pawn_location[1]+=direction[1]*self.__pawn_speed
+    
+    def __change_pawn_direction(self,direction): #bunu da inherit etmek lazım
+        
+        if direction[0]==0:
+            direction[1]=0
+            direction[0]=random.choice([-1,1])
+            
+        else:
+            direction[0]=0
+            direction[1]=random.choice([-1,1])
+      
+            
+
+        
 
 class Boss(Monster):
 
     def __init__(self):
         super().__init__()
-        self.__boss_direction:list
-        self.__boss_image: str
-        self.__boss_location :list
-        self.__monster_remaining_lives:int
+        self.__boss_speed=1 #inherit et
+        self.__boss_direction=[1,0]
+        self.__boss_image=pygame.transform.scale(pygame.image.load("stop.png"),(30,30))
+        self.__boss_location = 400,400
+        self.__monster_remaining_lives = 3
 
     def __boss_move():
         pass
@@ -233,7 +254,7 @@ class Game():#
         a=1 #$$$$$$$$$44
         self.__player=Player(a)
         self.__ghost=Ghost()
-        self.__ghost=Pawn()
+        self.__pawn=Pawn()
         self.__ghost=Boss() 
         self.__collectible=Collectible() 
         self.__gate=Gate()
@@ -320,30 +341,40 @@ class Game():#
                             self.__show_screen(self.__all_screen_attribues[self.__screen_number])
                 
                 
-
-
+                if self.__screen_number==1:
+                    self.__player._Player__move(self.__player._Player__direction)
 
 
 
 
                 ########################
 
-                if self.__screen_number==1:
+            if self.__screen_number==1:
 
-                    self.__screen.fill(self.__window_color)
+                self.__screen.fill(self.__window_color)
 
                     
-                    self.__player._Player__move(self.__player._Player__direction)
+                
 
-                    for i in range(len(self.__bricks)):#
-                            self.__draw(self.__screen, self.__bricks[i]._Brick__brick_image , self.__bricks[i]._Brick__brick_location)
 
-                    for i in range(len(self.__wall_list)):#
-                            self.__draw(self.__screen, self.__wall_list[i]._Wall__wall_image, self.__wall_list[i]._Wall__location_of_wall)
+
+
+                if self.__is_there_a_wall(self.__wall_list, self.__get_pawn_location(),self.__pawn._Pawn__pawn_direction)==False and self.__is_there_a_brick(self.__bricks, self.__get_pawn_location(),self.__pawn._Pawn__pawn_direction)==False:
+                    self.__pawn._Pawn__pawn_move(self.__pawn._Pawn__pawn_direction)
+                else:
+                    self.__pawn._Pawn__change_pawn_direction(self.__pawn._Pawn__pawn_direction)
+                    self.__pawn._Pawn__pawn_move(self.__pawn._Pawn__pawn_direction)
+
+                for i in range(len(self.__bricks)):#
+                        self.__draw(self.__screen, self.__bricks[i]._Brick__brick_image , self.__bricks[i]._Brick__brick_location)
+
+                for i in range(len(self.__wall_list)):#
+                        self.__draw(self.__screen, self.__wall_list[i]._Wall__wall_image, self.__wall_list[i]._Wall__location_of_wall)
                             
                     
                         
-                    self.__draw(self.__screen, self.__player._Player__image,self.__player._Player__player_location)
+                self.__draw(self.__screen, self.__player._Player__image,self.__player._Player__player_location)
+                self.__draw(self.__screen, self.__pawn._Pawn__pawn_image,self.__pawn._Pawn__pawn_location)
 
 
                  
@@ -410,6 +441,47 @@ class Game():#
 
         return False
 
+
+    def __is_there_a_brick(self, bricks, player_location, new_direction):
+
+        if new_direction==[1,0]:
+            forbidden_ys=[n for n in range(player_location[1]-37, player_location[1]+27)]
+            for i in range(len(bricks)):
+                if bricks[i]._Brick__brick_location[1] in forbidden_ys:
+                    for j in range(29):#speed
+                        if player_location[0]+j==bricks[i]._Brick__brick_location[0]:
+                            return True       
+            return False
+        
+        elif new_direction==[-1,0]:
+            forbidden_ys=[n for n in range(player_location[1]-37, player_location[1]+27)]
+            for i in range(len(bricks)):
+                if bricks[i]._Brick__brick_location[1] in forbidden_ys:
+                    for j in range(29):#speed
+                        if player_location[0]-j==bricks[i]._Brick__brick_location[0]:
+                            return True       
+            return False
+        
+        elif new_direction==[0,1]:
+            forbidden_xs=[n for n in range(player_location[0]-37, player_location[0]+27)]
+            for i in range(len(bricks)):
+                if bricks[i]._Brick__brick_location[0] in forbidden_xs:
+                    for j in range(29):
+                        if player_location[1]+j==bricks[i]._Brick__brick_location[1]:
+                            return True       
+            return False
+        
+        elif new_direction==[0,-1]:
+            forbidden_xs=[n for n in range(player_location[0]-37, player_location[0]+27)]
+            for i in range(len(bricks)):
+                if bricks[i]._Brick__brick_location[0] in forbidden_xs:
+                    for j in range(29):
+                        if player_location[1]-j==bricks[i]._Brick__brick_location[1]:
+                            return True       
+            return False
+
+
+        return False
             
             
                     
@@ -442,7 +514,9 @@ class Game():#
 
     def __get_player_location(self):
         return self.__player._Player__player_location
-
+    
+    def __get_pawn_location(self):
+        return self.__pawn._Pawn__pawn_location
 
 
 game=Game()
