@@ -12,6 +12,8 @@ class Player():
         self.__player_location = [40,40]
         self.__player_score = 0
         self.__player_remaining_lives = 3
+        self.__bomb=bomb
+        self.__did_i_place_bomb=False
         
     def __move(self,direction):
         
@@ -19,9 +21,13 @@ class Player():
         self.__player_location[1]+=direction[1]*self.__speed
 
         
+    
+    def __place_bomb(self,location):
+        self.__bomb._Bomb__bomb_location=location
+        self.__bomb._Bomb__am_i_placed=True
+  
 
-    def __place_bomb():
-        pass
+        
 
     def __collect():
         pass
@@ -51,18 +57,22 @@ class Player():
 class Bomb:
 
     def __init__(self): 
-        self.__bomb_image : str
-        self.__bomb_location : list
-        self.__wating_duration: int
+        self.__image=pygame.transform.scale(pygame.image.load("bomb.png"),(10,10))
+        self.__bomb_location=[0,0]
+        self.__wating_duration=3
+        self.__am_i_placed=False
+        self.__explosion_image=pygame.transform.scale(pygame.image.load("gold.png"),(40,40))
+        
+    
+    def __trigger_explosion(self,x):
+        x+=1
+        if x==100000:
+            x=0
+            return True
 
-    def __trigger_explosion():
-        pass
+        
 
-    def __draw_bomb():
-        pass
-
-    def __explosion():
-        pass
+   
 
 
 class Monster():
@@ -91,7 +101,7 @@ class Pawn(Monster):
     
     def __init__(self):
         super().__init__()
-        self.__pawn_speed=1 ## inherit et
+        self.__speed=1 ## inherit et
         self.__pawn_direction=[1,0]
         self.__pawn_image=pygame.transform.scale(pygame.image.load("pawn.png"),(30,30))
         self.__pawn_location = [250,250]
@@ -101,11 +111,11 @@ class Pawn(Monster):
         """n=random.randint(1,1000)
         if n==1:
             self.__change_pawn_direction(direction)
-            self.__pawn_location[0]+=direction[0]*self.__pawn_speed
-            self.__pawn_location[1]+=direction[1]*self.__pawn_speed
+            self.__pawn_location[0]+=direction[0]*self.__speed
+            self.__pawn_location[1]+=direction[1]*self.__speed
         else:"""
-        self.__pawn_location[0]+=direction[0]*self.__pawn_speed
-        self.__pawn_location[1]+=direction[1]*self.__pawn_speed
+        self.__pawn_location[0]+=direction[0]*self.__speed
+        self.__pawn_location[1]+=direction[1]*self.__speed
     
     def __change_pawn_direction(self,direction): #bunu da inherit etmek lazım
         
@@ -125,14 +135,25 @@ class Boss(Monster):
 
     def __init__(self):
         super().__init__()
-        self.__boss_speed=1 #inherit et
+        self.__speed=2 #inherit et
         self.__boss_direction=[1,0]
         self.__boss_image=pygame.transform.scale(pygame.image.load("stop.png"),(30,30))
-        self.__boss_location = 400,400
+        self.__boss_location = [400,400]
         self.__monster_remaining_lives = 3
 
-    def __boss_move():
-        pass
+    def __boss_move(self,direction):
+        self.__boss_location[0]+=direction[0]*self.__speed
+        self.__boss_location[1]+=direction[1]*self.__speed
+
+    def __change_boss_direction(self,direction): #bunu da inherit etmek lazım
+        
+        if direction[0]==0:
+            direction[1]=0
+            direction[0]=random.choice([-1,1])
+            
+        else:
+            direction[0]=0
+            direction[1]=random.choice([-1,1])
 
 class Ghost(Monster):
 
@@ -154,10 +175,10 @@ class Stationary:
 
 class Collectible(Stationary):
     
-    def __init__(self):
+    def __init__(self,location):
         super().__init__()
-        self.__location_of_collectible:list
-        self.__collectible_image: str
+        self.__location_of_collectible=location
+        self.__collectible_image=pygame.transform.scale(pygame.image.load("gold.png"),(30,30))
 
     def __is_there_a_collectible():
         pass
@@ -206,10 +227,10 @@ class Brick(Stationary):
 
 class Gate(Stationary):
 
-    def __init__(self):
+    def __init__(self,location):
         super().__init__()
-        self.__gate_location : list
-        self.__gate_image : str
+        self.__gate_location = location
+        self.__gate_image = pygame.transform.scale(pygame.image.load("gate.png"),(30,30))
     
     def __is_there_a_gate():
         pass
@@ -241,6 +262,9 @@ class Game():#
         self.__screen_number=0
         self.__show_screen(self.__all_screen_attribues[self.__screen_number])
 
+        self.__start_time=pygame.time.get_ticks()
+        self.__current_time=pygame.time.get_ticks()
+
         ####
         #self.__starting_screen = pygame.display.set_mode((self.__window_width, self.__window_width))
         #self.__finishing_screen =pygame.display.set_mode((self.__window_width, self.__window_width))
@@ -249,15 +273,15 @@ class Game():#
         ### new
         self.__wall_list=[]
         self.__bricks=[]
+        self.__collectibles=[]
 
-
-        a=1 #$$$$$$$$$44
-        self.__player=Player(a)
+        bomb=Bomb()
+        self.__player=Player(bomb)
         self.__ghost=Ghost()
         self.__pawn=Pawn()
-        self.__ghost=Boss() 
-        self.__collectible=Collectible() 
-        self.__gate=Gate()
+        self.__boss=Boss() 
+        
+        
 
         
         ### new fonksiyon içine al...
@@ -279,7 +303,21 @@ class Game():#
                                 self.__bricks.append(Brick([random_coor_x[random_x_number],random_coor_y[random_y_number]]))
                         
 
-                
+
+        r=random.randint(0,len(self.__bricks)-1)
+        self.__gate=Gate(self.__bricks[r]._Brick__brick_location)
+
+        
+        k=0
+        while k<5:
+            r_c=random.randint(0,len(self.__bricks)-1)
+            if r_c!=r:
+             
+                self.__collectibles.append(Collectible(self.__bricks[r_c]._Brick__brick_location))
+                k+=1
+
+
+
         random_x=40
         random_y=40
         for i in range(20):
@@ -339,7 +377,14 @@ class Game():#
                     if event.key == K_RETURN:
                             self.__screen_number=1
                             self.__show_screen(self.__all_screen_attribues[self.__screen_number])
-                
+                            
+
+
+                    if event.key == K_SPACE:
+                        self.__start_time = pygame.time.get_ticks()
+                        self.__player._Player__place_bomb(self.__player._Player__player_location)
+                        
+
                 
                 if self.__screen_number==1:
                     self.__player._Player__move(self.__player._Player__direction)
@@ -365,17 +410,74 @@ class Game():#
                     self.__pawn._Pawn__change_pawn_direction(self.__pawn._Pawn__pawn_direction)
                     self.__pawn._Pawn__pawn_move(self.__pawn._Pawn__pawn_direction)
 
+
+                if self.__is_there_a_wall(self.__wall_list, self.__get_boss_location(),self.__boss._Boss__boss_direction)==False and self.__is_there_a_brick(self.__bricks, self.__get_boss_location(),self.__boss._Boss__boss_direction)==False:
+                    self.__boss._Boss__boss_move(self.__boss._Boss__boss_direction)
+                else:
+                    self.__boss._Boss__change_boss_direction(self.__boss._Boss__boss_direction)
+                    self.__boss._Boss__boss_move(self.__boss._Boss__boss_direction)
+
+
+                self.__draw(self.__screen, self.__gate._Gate__gate_image, self.__gate._Gate__gate_location)
+                
+
+
+                for i in range(len(self.__collectibles)):#
+                    self.__draw(self.__screen, self.__collectibles[i]._Collectible__collectible_image , self.__collectibles[i]._Collectible__location_of_collectible)
+
+
                 for i in range(len(self.__bricks)):#
                         self.__draw(self.__screen, self.__bricks[i]._Brick__brick_image , self.__bricks[i]._Brick__brick_location)
 
                 for i in range(len(self.__wall_list)):#
                         self.__draw(self.__screen, self.__wall_list[i]._Wall__wall_image, self.__wall_list[i]._Wall__location_of_wall)
-                            
+                
+
+
+                #alttaki ikisi silinecek
+                self.__draw(self.__screen, self.__gate._Gate__gate_image, self.__gate._Gate__gate_location)
+
+                for i in range(len(self.__collectibles)):#
+                    self.__draw(self.__screen, self.__collectibles[i]._Collectible__collectible_image , self.__collectibles[i]._Collectible__location_of_collectible)
+
+                
+                
+       
                     
                         
                 self.__draw(self.__screen, self.__player._Player__image,self.__player._Player__player_location)
                 self.__draw(self.__screen, self.__pawn._Pawn__pawn_image,self.__pawn._Pawn__pawn_location)
+                self.__draw(self.__screen, self.__boss._Boss__boss_image,self.__boss._Boss__boss_location)
 
+
+                if self.__player._Player__bomb._Bomb__am_i_placed:
+                    #print("q")
+                    self.__draw(self.__screen, self.__player._Player__bomb._Bomb__image, self.__player._Player__bomb._Bomb__bomb_location)
+                     #self.__player._Player__bomb._Bomb__bomb_location bunun gibi bomb location olmalı
+                    #print(self.__player._Player__bomb._Bomb__bomb_location)
+                    
+                    
+                
+                if self.__player._Player__bomb._Bomb__am_i_placed:
+                    self.__current_time = pygame.time.get_ticks()
+
+                    if self.__current_time-self.__start_time>3000 and self.__current_time-self.__start_time<6000: # alttakileri tek fonksiyona at draw_explosion
+
+                        self.__draw(self.__screen, self.__player._Player__bomb._Bomb__explosion_image,self.__player._Player__bomb._Bomb__bomb_location)
+                        self.__draw(self.__screen, self.__player._Player__bomb._Bomb__explosion_image,[self.__player._Player__bomb._Bomb__bomb_location[0]+40,self.__player._Player__bomb._Bomb__bomb_location[1]])
+                        self.__draw(self.__screen, self.__player._Player__bomb._Bomb__explosion_image,[self.__player._Player__bomb._Bomb__bomb_location[0]+80,self.__player._Player__bomb._Bomb__bomb_location[1]])
+                        self.__draw(self.__screen, self.__player._Player__bomb._Bomb__explosion_image,[self.__player._Player__bomb._Bomb__bomb_location[0]-40,self.__player._Player__bomb._Bomb__bomb_location[1]])
+                        self.__draw(self.__screen, self.__player._Player__bomb._Bomb__explosion_image,[self.__player._Player__bomb._Bomb__bomb_location[0]-80,self.__player._Player__bomb._Bomb__bomb_location[1]])
+                        self.__draw(self.__screen, self.__player._Player__bomb._Bomb__explosion_image,[self.__player._Player__bomb._Bomb__bomb_location[0],self.__player._Player__bomb._Bomb__bomb_location[1]+40])
+                        self.__draw(self.__screen, self.__player._Player__bomb._Bomb__explosion_image,[self.__player._Player__bomb._Bomb__bomb_location[0],self.__player._Player__bomb._Bomb__bomb_location[1]+80])
+                        self.__draw(self.__screen, self.__player._Player__bomb._Bomb__explosion_image,[self.__player._Player__bomb._Bomb__bomb_location[0],self.__player._Player__bomb._Bomb__bomb_location[1]-40])
+                        self.__draw(self.__screen, self.__player._Player__bomb._Bomb__explosion_image,[self.__player._Player__bomb._Bomb__bomb_location[0],self.__player._Player__bomb._Bomb__bomb_location[1]-80])
+
+                    elif self.__current_time-self.__start_time>=6000:
+                        self.__current_time=0
+                        self.__player._Player__bomb._Bomb__am_i_placed=False
+
+                    
 
                  
             pygame.display.update()
@@ -517,6 +619,12 @@ class Game():#
     
     def __get_pawn_location(self):
         return self.__pawn._Pawn__pawn_location
+    
+    def __get_boss_location(self):
+        return self.__boss._Boss__boss_location
+    
+    def __get_bomb_image(self):
+        return self.__player._Player__bomb._Bomb__bomb_image
 
 
 game=Game()
