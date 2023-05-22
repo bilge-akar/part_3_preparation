@@ -12,7 +12,7 @@ class Player():
         self.__player_location = [40,40]
         self.__player_score = 0
         self.__player_remaining_lives = 3
-        self.__bomb=bomb
+        self.__bomb = bomb
         self.__did_i_place_bomb=False
         
     def __move(self,direction):
@@ -27,7 +27,6 @@ class Player():
         self.__bomb._Bomb__am_i_placed=True
   
 
-        
 
     def __collect():
         pass
@@ -61,7 +60,7 @@ class Bomb:
         self.__bomb_location=[0,0]
         self.__wating_duration=3
         self.__am_i_placed=False
-        self.__explosion_image=pygame.transform.scale(pygame.image.load("gold.png"),(40,40))
+        self.__explosion_image=pygame.transform.scale(pygame.image.load("explosion.png"),(40,40))
         
     
     def __trigger_explosion(self,x):
@@ -69,6 +68,18 @@ class Bomb:
         if x==100000:
             x=0
             return True
+        
+    def __decide_locations(self, location):
+        location_list = []
+        for i in range(-2,3):
+            location_list.append([location[0], location[1]+i*40])
+            location_list.append([location[0]+i*40, location[1]])
+        return location_list
+    
+    def __destroy(self, location):
+        pass
+        
+
 
         
 
@@ -80,7 +91,7 @@ class Monster():
     def __init__(self):
         self.__monster_speed=3
         self.__monster_remaining_lives=1
-
+        self.__monster_list=[]
     
     def __kill():
         pass
@@ -217,8 +228,8 @@ class Brick(Stationary):
         self.__brick_image = pygame.transform.scale(pygame.image.load('brick.png'), (40,40))
 
     
-    def __delete_bricks():
-        pass
+    def __delete_bricks(self, bricks, i):
+        bricks.remove(bricks[i])
 
     def __are_bricks_hit():
         pass
@@ -237,7 +248,7 @@ class Gate(Stationary):
 
 
 
-class Game():#
+class Game(): #
     def __init__(self):
 
         pygame.init()
@@ -462,16 +473,17 @@ class Game():#
                     self.__current_time = pygame.time.get_ticks()
 
                     if self.__current_time-self.__start_time>3000 and self.__current_time-self.__start_time<6000: # alttakileri tek fonksiyona at draw_explosion
+                        location_list = self.__player._Player__bomb._Bomb__decide_locations(self.__player._Player__bomb._Bomb__bomb_location)
+                        
+                        for i in location_list:
 
-                        self.__draw(self.__screen, self.__player._Player__bomb._Bomb__explosion_image,self.__player._Player__bomb._Bomb__bomb_location)
-                        self.__draw(self.__screen, self.__player._Player__bomb._Bomb__explosion_image,[self.__player._Player__bomb._Bomb__bomb_location[0]+40,self.__player._Player__bomb._Bomb__bomb_location[1]])
-                        self.__draw(self.__screen, self.__player._Player__bomb._Bomb__explosion_image,[self.__player._Player__bomb._Bomb__bomb_location[0]+80,self.__player._Player__bomb._Bomb__bomb_location[1]])
-                        self.__draw(self.__screen, self.__player._Player__bomb._Bomb__explosion_image,[self.__player._Player__bomb._Bomb__bomb_location[0]-40,self.__player._Player__bomb._Bomb__bomb_location[1]])
-                        self.__draw(self.__screen, self.__player._Player__bomb._Bomb__explosion_image,[self.__player._Player__bomb._Bomb__bomb_location[0]-80,self.__player._Player__bomb._Bomb__bomb_location[1]])
-                        self.__draw(self.__screen, self.__player._Player__bomb._Bomb__explosion_image,[self.__player._Player__bomb._Bomb__bomb_location[0],self.__player._Player__bomb._Bomb__bomb_location[1]+40])
-                        self.__draw(self.__screen, self.__player._Player__bomb._Bomb__explosion_image,[self.__player._Player__bomb._Bomb__bomb_location[0],self.__player._Player__bomb._Bomb__bomb_location[1]+80])
-                        self.__draw(self.__screen, self.__player._Player__bomb._Bomb__explosion_image,[self.__player._Player__bomb._Bomb__bomb_location[0],self.__player._Player__bomb._Bomb__bomb_location[1]-40])
-                        self.__draw(self.__screen, self.__player._Player__bomb._Bomb__explosion_image,[self.__player._Player__bomb._Bomb__bomb_location[0],self.__player._Player__bomb._Bomb__bomb_location[1]-80])
+                            self.__draw(self.__screen, self.__player._Player__bomb._Bomb__explosion_image, i)
+                            
+                            x, y = self.__is_there_a_brick(self.__bricks, i, [0,0])
+                            if x == True:
+                                self.__bricks[y]._Brick__delete_bricks(self.__bricks, y)
+
+
 
                     elif self.__current_time-self.__start_time>=6000:
                         self.__current_time=0
@@ -540,7 +552,6 @@ class Game():#
                             return True       
             return False
 
-
         return False
 
 
@@ -581,9 +592,14 @@ class Game():#
                         if player_location[1]-j==bricks[i]._Brick__brick_location[1]:
                             return True       
             return False
+        
+        else:
+            for i in range(len(bricks)):
+                if bricks[i]._Brick__brick_location == player_location:
+                    return True, i
 
 
-        return False
+        return False, None
             
             
                     
